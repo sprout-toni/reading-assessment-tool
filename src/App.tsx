@@ -545,8 +545,8 @@ const ReadingAssessmentTool = () => {
                         </span>
                         <div
                           className={`w-3 h-3 rounded-full ${
-                            questionResult === 'kudos' ? 'bg-green-400' :
-                            questionResult === 'suggestion' ? 'bg-yellow-400' : 'bg-red-400'
+                            questionResult === 'kudos' ? 'bg-green-500' :
+                            questionResult === 'suggestion' ? 'bg-yellow-500' : 'bg-red-500'
                           }`}
                         />
                       </div>
