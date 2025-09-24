@@ -306,13 +306,66 @@ const ReadingAssessmentTool = () => {
             <label className="block text-sm font-medium mb-2" style={{ color: colors.midnightBlue }}>
               How old is your child?
             </label>
-            <input
-              type="number"
-              value={parentData.age}
-              onChange={(e) => handleParentDataChange('age', e.target.value)}
-              className="w-full p-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-teal focus:border-transparent"
-              placeholder="Enter age"
-            />
+            <div className="relative">
+              <input
+                type="number"
+                value={parentData.age}
+                onChange={(e) => handleParentDataChange('age', e.target.value)}
+                onKeyDown={(e) => {
+                  // Allow arrow keys to increment/decrement
+                  if (e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    const currentAge = parseInt(parentData.age) || 0;
+                    if (currentAge < 18) {
+                      handleParentDataChange('age', (currentAge + 1).toString());
+                    }
+                  } else if (e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    const currentAge = parseInt(parentData.age) || 0;
+                    if (currentAge > 3) {
+                      handleParentDataChange('age', (currentAge - 1).toString());
+                    }
+                  }
+                }}
+                min="3"
+                max="18"
+                step="1"
+                className="w-full p-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-teal focus:border-transparent pr-20"
+                placeholder="Enter age (3-18)"
+              />
+              <div className="absolute right-2 top-1/2 transform -translate-y-1/2 flex flex-col">
+                <button
+                  type="button"
+                  onClick={() => {
+                    const currentAge = parseInt(parentData.age) || 0;
+                    if (currentAge < 18) {
+                      handleParentDataChange('age', (currentAge + 1).toString());
+                    }
+                  }}
+                  className="w-6 h-6 flex items-center justify-center text-gray-400 hover:text-gray-600 focus:outline-none focus:text-gray-600 transition-colors"
+                  tabIndex={-1}
+                >
+                  <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 12 12">
+                    <path d="M6 0l6 6H0z"/>
+                  </svg>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const currentAge = parseInt(parentData.age) || 0;
+                    if (currentAge > 3) {
+                      handleParentDataChange('age', (currentAge - 1).toString());
+                    }
+                  }}
+                  className="w-6 h-6 flex items-center justify-center text-gray-400 hover:text-gray-600 focus:outline-none focus:text-gray-600 transition-colors"
+                  tabIndex={-1}
+                >
+                  <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 12 12">
+                    <path d="M0 0h12l-6 6z"/>
+                  </svg>
+                </button>
+              </div>
+            </div>
           </div>
 
           <div>
