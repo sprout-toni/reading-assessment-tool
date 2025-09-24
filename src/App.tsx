@@ -1,6 +1,35 @@
 import React, { useState } from 'react';
 import { generatePersonalizedRecommendation } from './services/openai';
 
+// Component to convert URLs in text to clickable links
+const RecommendationText = ({ text }: { text: string }) => {
+  // Regular expression to find URLs
+  const urlRegex = /(https?:\/\/[^\s]+)/g;
+
+  const parts = text.split(urlRegex);
+
+  return (
+    <>
+      {parts.map((part, index) => {
+        if (urlRegex.test(part)) {
+          return (
+            <a
+              key={index}
+              href={part}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-600 hover:text-blue-800 underline transition-colors"
+            >
+              {part}
+            </a>
+          );
+        }
+        return part;
+      })}
+    </>
+  );
+};
+
 const ReadingAssessmentTool = () => {
   const [currentStep, setCurrentStep] = useState('intro');
   const [parentData, setParentData] = useState({
@@ -477,9 +506,9 @@ const ReadingAssessmentTool = () => {
                 <h3 className="text-base sm:text-lg font-medium mb-4" style={{ color: colors.teal }}>
                   Personalized Recommendation
                 </h3>
-                <p className="text-base sm:text-lg text-gray-700 leading-relaxed">
-                  {aiRecommendation || resultInfo.message}
-                </p>
+                <div className="text-base sm:text-lg text-gray-700 leading-relaxed">
+                  <RecommendationText text={aiRecommendation || resultInfo.message} />
+                </div>
               </div>
 
               <div
@@ -498,29 +527,33 @@ const ReadingAssessmentTool = () => {
               Detailed Results
             </h3>
             <div className="space-y-3">
-              {Object.keys(results.questions).map(qId => {
-                const questionResult = results.questions[qId];
-                const wrongCount = results.responses[qId];
+              {(() => {
                 const questions = testPath === 'kindergarten' ? kindergartenQuestions : gradeQuestions;
-                const question = questions.find(q => q.id == qId);
 
-                return (
-                  <div key={qId} className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-                    <span className="text-gray-700 text-sm sm:text-base flex-1 mr-3">{question?.title}</span>
-                    <div className="flex items-center flex-shrink-0">
-                      <span className="text-xs sm:text-sm text-gray-500 mr-2 sm:mr-3">
-                        {wrongCount} wrong
-                      </span>
-                      <div
-                        className={`w-3 h-3 rounded-full ${
-                          questionResult === 'kudos' ? 'bg-green-400' :
-                          questionResult === 'suggestion' ? 'bg-yellow-400' : 'bg-red-400'
-                        }`}
-                      />
+                // Show ALL questions that were answered, even if they got 0 wrong
+                return questions.map(question => {
+                  const qId = question.id.toString();
+                  const questionResult = results.questions[qId];
+                  const wrongCount = results.responses[qId] || 0;
+
+                  return (
+                    <div key={qId} className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                      <span className="text-gray-700 text-sm sm:text-base flex-1 mr-3">{question.title}</span>
+                      <div className="flex items-center flex-shrink-0">
+                        <span className="text-xs sm:text-sm text-gray-500 mr-2 sm:mr-3">
+                          {wrongCount} wrong
+                        </span>
+                        <div
+                          className={`w-3 h-3 rounded-full ${
+                            questionResult === 'kudos' ? 'bg-green-400' :
+                            questionResult === 'suggestion' ? 'bg-yellow-400' : 'bg-red-400'
+                          }`}
+                        />
+                      </div>
                     </div>
-                  </div>
-                );
-              })}
+                  );
+                });
+              })()}
             </div>
           </div>
 
