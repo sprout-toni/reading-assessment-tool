@@ -1,11 +1,38 @@
 import React, { useState } from 'react';
 import { generatePersonalizedRecommendation } from './services/openai';
 
-// Component to convert URLs in text to clickable links
+// Component to convert URLs and link patterns in text to clickable links
 const RecommendationText = ({ text }: { text: string }) => {
-  // Regular expression to find URLs
-  const urlRegex = /(https?:\/\/[^\s]+)/g;
+  // Handle "Speak with an expert" pattern with consultation URL
+  const consultationUrl = 'https://meetings.hubspot.com/aockert/consultation';
 
+  // Replace "Speak with an expert" with a clickable link
+  if (text.includes('Speak with an expert')) {
+    const parts = text.split('Speak with an expert');
+
+    return (
+      <>
+        {parts.map((part, index) => (
+          <span key={index}>
+            {part}
+            {index < parts.length - 1 && (
+              <a
+                href={consultationUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-600 hover:text-blue-800 underline transition-colors font-medium"
+              >
+                Speak with an expert
+              </a>
+            )}
+          </span>
+        ))}
+      </>
+    );
+  }
+
+  // Fallback: Handle regular URLs (for backward compatibility)
+  const urlRegex = /(https?:\/\/[^\s]+)/g;
   const parts = text.split(urlRegex);
 
   return (
@@ -71,19 +98,21 @@ const ReadingAssessmentTool = () => {
       id: 2,
       title: "Sound Segmentation",
       instruction: "Say: 'Now I want you to tell me each sound in each of these words. For example, if I say cat, the sounds are /k/ /a/ /t/'",
-      words: ["bus", "coat", "fish"],
-      maxWrong: 3
+      words: ["coat", "wig", "fish", "sock", "mud"],
+      maxWrong: 5
     },
     {
       id: 3,
       title: "Sound Deletion",
       instruction: "Say: 'Now I'm going to say a word and I want you to take part of the word away to make a new word. For example, if I say feel and take out /f/, I get eel.'",
       tasks: [
-        "Say 'bus' without the /b/ sound",
         "Say 'fall' without the /f/ sound",
+        "Say 'cup' without the /k/ sound",
+        "Say 'send' without the /s/ sound",
+        "Say 'bold' without the /b/ sound",
         "Say 'gate' without the /g/ sound"
       ],
-      maxWrong: 3
+      maxWrong: 5
     }
   ];
 
@@ -99,32 +128,34 @@ const ReadingAssessmentTool = () => {
       id: 2,
       title: "Sound Segmentation",
       instruction: "Say: 'Now I want you to tell me each sound in each of these words. For example, if I say cat, the sounds are /k/ /a/ /t/'",
-      words: ["bus", "coat", "fish"],
-      maxWrong: 3
+      words: ["coat", "wig", "fish", "sock", "mud"],
+      maxWrong: 5
     },
     {
       id: 3,
       title: "Sound Deletion",
       instruction: "Say: 'Now I'm going to say a word and I want you to take part of the word away to make a new word. For example, if I say feel and take out /f/, I get eel.'",
       tasks: [
-        "Say 'bus' without the /b/ sound",
         "Say 'fall' without the /f/ sound",
+        "Say 'cup' without the /k/ sound",
+        "Say 'send' without the /s/ sound",
+        "Say 'bold' without the /b/ sound",
         "Say 'gate' without the /g/ sound"
       ],
-      maxWrong: 3
+      maxWrong: 5
     },
     {
       id: 4,
-      title: "Nonsense Words 1",
+      title: "Phonics: CVC, Blends, Silent E, and R-Controlled Vowels",
       instruction: "Ask your child to read this list of made-up words:",
-      words: ["litch", "mudge", "vux", "quam", "cep"],
+      words: ["yot", "stir", "hasp", "mape", "lurd"],
       maxWrong: 5
     },
     {
       id: 5,
-      title: "Nonsense Words 2",
+      title: "Phonics: Vowel Teams, Digraphs and Diphthongs",
       instruction: "Ask your child to read this list of made-up words:",
-      words: ["kray", "fraw", "chout", "koe", "poid"],
+      words: ["vay", "poit", "litch", "wrap", "poid"],
       maxWrong: 5
     }
   ];
@@ -132,13 +163,13 @@ const ReadingAssessmentTool = () => {
   const scoringMatrix = {
     kindergarten: {
       1: { 0: 'kudos', 1: 'suggestion', 2: 'suggestion', 3: 'action', 4: 'action', 5: 'action', 6: 'action' },
-      2: { 0: 'kudos', 1: 'suggestion', 2: 'action', 3: 'action' },
-      3: { 0: 'kudos', 1: 'suggestion', 2: 'action', 3: 'action' }
+      2: { 0: 'kudos', 1: 'suggestion', 2: 'suggestion', 3: 'action', 4: 'action', 5: 'action' },
+      3: { 0: 'kudos', 1: 'suggestion', 2: 'suggestion', 3: 'action', 4: 'action', 5: 'action' }
     },
     grade: {
       1: { 0: 'kudos', 1: 'suggestion', 2: 'action', 3: 'action', 4: 'action' },
-      2: { 0: 'kudos', 1: 'suggestion', 2: 'action', 3: 'action' },
-      3: { 0: 'kudos', 1: 'suggestion', 2: 'action', 3: 'action' },
+      2: { 0: 'kudos', 1: 'suggestion', 2: 'suggestion', 3: 'action', 4: 'action', 5: 'action' },
+      3: { 0: 'kudos', 1: 'suggestion', 2: 'suggestion', 3: 'action', 4: 'action', 5: 'action' },
       4: { 0: 'kudos', 1: 'suggestion', 2: 'suggestion', 3: 'action', 4: 'action', 5: 'action' },
       5: { 0: 'kudos', 1: 'suggestion', 2: 'suggestion', 3: 'action', 4: 'action', 5: 'action' }
     }
@@ -185,7 +216,10 @@ const ReadingAssessmentTool = () => {
 
     Object.keys(responses).forEach(qId => {
       const wrongCount = responses[qId];
-      const result = matrix[qId][wrongCount] || 'action';
+      const questionKey = parseInt(qId);
+      const result = matrix[questionKey] && matrix[questionKey][wrongCount] !== undefined
+        ? matrix[questionKey][wrongCount]
+        : 'action';
       questionResults[qId] = result;
 
       if (result === 'action') {
@@ -226,9 +260,9 @@ const ReadingAssessmentTool = () => {
     if (result === 'kudos') {
       return "Your child is demonstrating strong foundational reading skills. Continue to support their literacy development with rich reading experiences and regular practice. Consider exploring advanced reading materials to further enhance their growth.";
     } else if (result === 'suggestion') {
-      return "The assessment indicates some areas where your child could benefit from additional support. Early intervention is key to reading success. I recommend scheduling a consultation with our reading specialists at Sprout Labs to discuss targeted strategies: https://meetings.hubspot.com/aockert/consultation";
+      return "The assessment indicates some areas where your child could benefit from additional support. Early intervention is key to reading success. I recommend working with reading specialists to discuss targeted strategies.";
     } else {
-      return "The results suggest your child would significantly benefit from specialized reading intervention. Research shows that early, systematic instruction can make a profound difference. Please schedule a consultation with Sprout Labs immediately to begin developing a comprehensive support plan: https://meetings.hubspot.com/aockert/consultation";
+      return "The results suggest your child would significantly benefit from specialized reading intervention. Research shows that early, systematic instruction can make a profound difference.";
     }
   };
 
@@ -330,7 +364,7 @@ const ReadingAssessmentTool = () => {
                 min="3"
                 max="18"
                 step="1"
-                className="w-full p-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-teal focus:border-transparent pr-20"
+                className="w-full p-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-teal focus:border-transparent pr-20 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                 placeholder="Enter age (3-18)"
               />
               <div className="absolute right-2 top-1/2 transform -translate-y-1/2 flex flex-col">
@@ -426,7 +460,7 @@ const ReadingAssessmentTool = () => {
   const TestScreen = () => {
     const questions = testPath === 'kindergarten' ? kindergartenQuestions : gradeQuestions;
     const currentQ = questions[currentQuestion];
-    const currentResponse = responses[currentQ.id] || 0;
+    const currentResponse = responses[currentQ.id];
 
     return (
       <div className="max-w-2xl mx-auto p-4 sm:p-6">
@@ -561,6 +595,18 @@ const ReadingAssessmentTool = () => {
                 </h3>
                 <div className="text-base sm:text-lg text-gray-700 leading-relaxed">
                   <RecommendationText text={aiRecommendation || resultInfo.message} />
+                  {(results.overall === 'suggestion' || results.overall === 'action') && (
+                    <p className="mt-4">
+                      <a
+                        href="https://meetings.hubspot.com/aockert/consultation"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-blue-600 hover:text-blue-800 underline transition-colors font-medium"
+                      >
+                        Speak with an expert
+                      </a>
+                    </p>
+                  )}
                 </div>
               </div>
 

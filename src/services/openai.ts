@@ -129,7 +129,7 @@ Requirements:
 - End with appropriate next step:
   ${overallResult === 'kudos' ?
     '- For no issues: Suggest continued monitoring and enrichment' :
-    '- For any issues: Recommend scheduling consultation with Sprout Labs at https://meetings.hubspot.com/aockert/consultation'
+    '- For any issues: Focus on the importance of professional support and early intervention'
   }
 
 Provide only the recommendation text, no additional formatting or labels.
@@ -140,8 +140,8 @@ function getFallbackMessage(overallResult: string): string {
   if (overallResult === 'kudos') {
     return "Your child is demonstrating strong foundational reading skills. Continue to support their literacy development with rich reading experiences and regular practice. Consider exploring advanced reading materials to further enhance their growth.";
   } else if (overallResult === 'suggestion') {
-    return "The assessment indicates some areas where your child could benefit from additional support. Early intervention is key to reading success. I recommend scheduling a consultation with our reading specialists at Sprout Labs to discuss targeted strategies: https://meetings.hubspot.com/aockert/consultation";
+    return "The assessment indicates some areas where your child could benefit from additional support. Early intervention is key to reading success. I recommend working with reading specialists to discuss targeted strategies.";
   } else {
-    return "The results suggest your child would significantly benefit from specialized reading intervention. Research shows that early, systematic instruction can make a profound difference. Please schedule a consultation with Sprout Labs immediately to begin developing a comprehensive support plan: https://meetings.hubspot.com/aockert/consultation";
+    return "The results suggest your child would significantly benefit from specialized reading intervention. Research shows that early, systematic instruction can make a profound difference.";
   }
 }
